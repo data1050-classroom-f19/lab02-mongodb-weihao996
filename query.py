@@ -88,7 +88,7 @@ def query3():
     Returns:
         An array of documents.
     """
-    docs = db.airbnb.aggregate(
+    docs = db.airbnb.aggregate([
         # TODO: implement 
         {
             '$group': {
@@ -155,7 +155,7 @@ def query5():
 
 
     """
-    docs = db.airbnb.aggregate(
+    docs = db.airbnb.aggregate([
         # TODO: implement me
         {
            '$geoNear': {
