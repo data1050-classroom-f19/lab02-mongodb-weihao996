@@ -24,6 +24,18 @@ def query1(minFare, maxFare):
     """
     docs = db.taxi.find(
         # TODO: implement me
+        {
+            'fare_amount': {
+                '$gte': minFare,
+                '$lte': maxFare
+            }
+        }, 
+        {
+            '_id': 0,
+            'pickup_longitude': 1,
+            'pickup_latitude': 1,
+            'fare_amount': 1
+        }
     )
 
     result = [doc for doc in docs]
@@ -77,7 +89,16 @@ def query3():
         An array of documents.
     """
     docs = db.airbnb.aggregate(
-        # TODO: implement me
+        # TODO: implement 
+        {
+            '$group': {
+                '_id': '$neighbourhood_group',
+                'average_price': {'$avg': '$price'}
+            }
+        },
+        {
+            '$sort': {"average_price": -1}
+        }]
     )
 
     result = [doc for doc in docs]
@@ -96,6 +117,21 @@ def query4():
     """
     docs = db.taxi.aggregate(
         # TODO: implement me
+        [{
+            '$group': {
+                '_id': {'$hour': '$pickup_datetime'},
+                'average_fare': {'$avg': '$fare_amount'},
+                'average_dist': {'$avg': {'$add': [{'$abs': {'$subtract': ['$pickup_longitude', '$dropoff_longitude']}}, 
+                                          {'$abs': {'$subtract': ['$pickup_latitude', '$dropoff_latitude']}}]
+                                          }
+                                 },
+                'passenger_count':{'$sum': '$passenger_count'}
+            }
+        },
+        
+         {
+            '$sort': {"average_fare": -1}
+        }]
     )
     result = [doc for doc in docs]
     return result
@@ -121,6 +157,28 @@ def query5():
     """
     docs = db.airbnb.aggregate(
         # TODO: implement me
-    )
+        {
+           '$geoNear': {
+               'near': {'type': 'Point', 'coordinates': [longitude, latitude]},
+               'distanceField': 'dist.calculated',
+               'maxDistance': 1000,
+               'spherical': False
+           }
+       },
+       {
+           '$project': {
+               '_id': 0,
+               'dist': 1,
+               'name': 1,
+               'neighbourhood': 1,
+               'neighbourhood_group': 1,
+               'price': 1,
+               'room_type': 1
+           }
+       },
+       {
+           '$sort': {'dist': 1}
+       }
+    ])
     result = [doc for doc in docs]
     return result
